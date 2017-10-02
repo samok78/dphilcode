@@ -1,0 +1,26 @@
+Hi Lucas -
+
+What you see here is an old validation script that was designed to work with the old input files.
+
+I want to make a similar validation script that works with the new input files. This script should:
+
+-read in model files
+-build ensembles of the files for each year
+
+CYCLE
+-Average over all years so that you can see value per month for every ensemble
+-Compare to CHIRPS
+
+TIMESERIES
+-Average over each month so you get time series in every year for each ensemble member
+-Compare to CHIRPS
+
+BIAS
+-Compare monthly averages over entire time period for each ensemble member.
+-Subtract CHIRPS monthly averages over same time period.
+
+Q-Q
+-NOT SURE WHAT MAKES SENSE. COMPARE SEASONAL AVERAGE RAINFALL OVER ALL YEARS FOR EACH ENSEMBLE WITH CHIRPS. HEAVY LINE FOR ENS MEAN VS CHIRPS
+
+HISTOGRAM
+-Probably compare all values with all values in CHIRPS
