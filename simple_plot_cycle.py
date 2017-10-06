@@ -2,6 +2,56 @@ import numpy as np
 from netCDF4 import Dataset as ncfile
 import matplotlib.pyplot as plt
 from sys import exit
+import os
+
+cwd = os.getcwd()
+subpath = r'NEWINPUT/WAH_MODEL/'
+fname = r'NEWINPUT/WAH_MODEL/item5216_monthly_mean_h000_1985-12_1986-12.nc'
+path = os.path.join(cwd,fname)
+dir_path = os.path.join(cwd,subpath)
+print dir_path
+print path
+
+onlyfiles = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+print onlyfiles
+files_split = [[f,f[0:-3].split('_')] for f in onlyfiles]
+for el in files_split:
+  fname = el.pop(0)
+  el[0].append(fname)
+files_split = [item for sublist in files_split for item in sublist]
+#files_split = [item for sublist in files_split for item in sublist]
+print files_split
+keys = ['variable_name','time_period','stat','ensemble_member','start_date','end_date','filename']
+files_dict = [dict(zip(keys,f)) for f in files_split]
+print files_dict
+selection = [el['filename'] for el in files_dict if el['end_date'][0:4]=='1990']
+print selection
+#convert filenames to a dict
+#write a loop that opens each file and adds to an empty np array
+
+
+
+"""
+dataset = ncfile(path)
+print dataset.file_format
+print dataset.dimensions.keys()
+print dataset.variables.keys()
+lats = dataset.variables['global_latitude0'][:]
+lons = dataset.variables['global_longitude0'][:]
+time = dataset.variables['global_longitude0'][:]
+pr = dataset.variables['item5216_monthly_mean'][:]
+
+print lats
+print lats.shape
+print lons
+print lons.shape
+print time
+print time.shape
+print pr 
+print pr.shape
+"""
+
+"""
 path = '/ouce-home/staff/sedm4922/Validation/'
 
 # factors to convert units to mm/month
@@ -86,4 +136,5 @@ plt.xticks(np.arange(12),mon)
 
 plt.show()
 #savefig(path+'Africa_Maps.pdf')
+"""
 
