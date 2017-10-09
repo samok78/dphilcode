@@ -29,6 +29,7 @@ print selection
 #convert filenames to a dict
 #write a loop that opens each file and adds to an empty np array
 
+#sarah test 
 
 
 """
