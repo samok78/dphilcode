@@ -16,6 +16,7 @@ print path
 #get lat/lon dims
 dataset = ncfile(path)
 lats = dataset.variables['global_latitude0'][:]
+lons = dataset.variables['global_longitude0'][:]
 lat_dim = lats.shape[0]
 lon_dim = lats.shape[1]
 
@@ -71,23 +72,73 @@ mon = ['01','02','03','04','05','06','07','08','09','10','11','12']
 #precip = np.zeros((12,25,146,209))
 #precip_ens = np.zeros((12,25,100,146,209))
 
+# get all the model run data into shape
 for year_ind in range(year_dim):
   selection = [el['filename'] for el in files_dict if el['end_year']==years[year_ind]]
-  print selection
   for run_ind in range(max_runs):
   	file_path = os.path.join(dir_path, selection[run_ind])
   	#print file_path
   	ds = ncfile(path)
-  	print ds.variables.keys()
   	ds_precip = ds.variables['item5216_monthly_mean'][:]
   	ds_precip = np.squeeze(ds_precip)
-  	print ds_precip.shape
   	precip_ens[:,year_ind,run_ind,:,:] = ds_precip
-    #lats = dataset.variables['global_latitude0'][:]
-    #lat_dim = lats.shape[0]
-    #lon_dim = lats.shape[1]
 print precip_ens
 
+#average it by axis
+precip_output = np.nanmean(precip_ens, axis=4)
+precip_output = np.nanmean(precip_output, axis=3)
+precip_output = np.nanmean(precip_output, axis=1)
+
+#get the average of all the runs
+precip_mean = np.nanmean(precip_output, axis=1)
+
+
+#filter GHOA extents
+min_lat = min(lats.flatten())
+max_lat = max(lats.flatten())
+min_lon = min(lons.flatten())
+max_lon = max(lons.flatten())
+
+print min_lat, max_lat, min_lon, max_lon
+
+
+#load in the historic data
+subpath = r'NEWINPUT/'
+fname = r'chirps_clim.nc'
+file_path = os.path.join(subpath,fname)
+chirps_ds = ncfile(file_path)
+#print chirps_ds.dimensions.keys()
+#print chirps_ds.variables.keys()
+chirps_precip = chirps_ds.variables['precip'][:]
+
+#get the lats and lons and times
+lats = chirps_ds.variables['latitude'][:]
+lons = chirps_ds.variables['longitude'][:]
+times = chirps_ds.variables['time'][:]
+
+#create masks using the GHOA extents
+lat_mask = ((lats>min_lat)&(lats<max_lat))
+lon_mask = ((lons>min_lon)&(lons<max_lon))
+
+#tile one dimension of those badboys out
+tile = np.tile(lat_mask,(len(lons),1))
+
+#create a mask of same global shape
+chirps_mask = np.ones((12,len(lats),len(lons)), dtype=bool)
+
+#multiply the boolean tile and lon mask, broadcast into the global mask
+chirps_mask[:,:,:] = np.multiply(tile.T, lon_mask)
+print chirps_mask.shape
+
+#get the masked data, (convert to 'not ~')
+chirps_ghoa = chirps_precip[~chirps_mask]
+print np.nanmean(chirps_ghoa)
+
+
+
+"""
+#rcp26 = dataset.variables['p50'][:]
+"""
 """
        
 for moncount in np.arange(len(mon)):
