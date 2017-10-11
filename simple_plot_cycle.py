@@ -12,47 +12,53 @@ dir_path = os.path.join(cwd,subpath)
 print dir_path
 print path
 
+
+#get lat/lon dims
+dataset = ncfile(path)
+lats = dataset.variables['global_latitude0'][:]
+lat_dim = lats.shape[0]
+lon_dim = lats.shape[1]
+
+
+#get all file names
 onlyfiles = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
-print onlyfiles
+#print onlyfiles
 files_split = [[f,f[0:-3].split('_')] for f in onlyfiles]
 for el in files_split:
   fname = el.pop(0)
   el[0].append(fname)
 files_split = [item for sublist in files_split for item in sublist]
 #files_split = [item for sublist in files_split for item in sublist]
-print files_split
+#print files_split
 keys = ['variable_name','time_period','stat','ensemble_member','start_date','end_date','filename']
 files_dict = [dict(zip(keys,f)) for f in files_split]
-print files_dict
+#print files_dict
+for el in files_dict:
+  el['end_year'] = el['end_date'][0:4]
+  el['start_year'] = el['start_date'][0:4]
 selection = [el['filename'] for el in files_dict if el['end_date'][0:4]=='1990']
-print selection
-#convert filenames to a dict
-#write a loop that opens each file and adds to an empty np array
+
+#get number of years
+years = list(set([el['end_year'] for el in files_dict]))
+print years
+year_dim = len(years)
+
+#get max number of runs
+n_runs = []
+for year in years:
+  selection = [el for el in files_dict if el['end_year']==year]
+  n_runs.append(len(selection))
+
+max_runs = max(n_runs)
+print max_runs
+
+#initialise the data arrays
+
+precip = np.zeros((13,year_dim,lat_dim,lon_dim))
+precip_ens = np.zeros((13,year_dim, max_runs, lat_dim, lon_dim))
 
 
-
-"""
-dataset = ncfile(path)
-print dataset.file_format
-print dataset.dimensions.keys()
-print dataset.variables.keys()
-lats = dataset.variables['global_latitude0'][:]
-lons = dataset.variables['global_longitude0'][:]
-time = dataset.variables['global_longitude0'][:]
-pr = dataset.variables['item5216_monthly_mean'][:]
-
-print lats
-print lats.shape
-print lons
-print lons.shape
-print time
-print time.shape
-print pr 
-print pr.shape
-"""
-
-"""
-path = '/ouce-home/staff/sedm4922/Validation/'
+#path = '/ouce-home/staff/sedm4922/Validation/'
 
 # factors to convert units to mm/month
 fac = 86400 # for the model
@@ -61,8 +67,27 @@ spatial = 'GHoA'
 # Define months array
 mon = ['01','02','03','04','05','06','07','08','09','10','11','12']
 
-precip = np.zeros((12,25,146,209))
-precip_ens = np.zeros((12,25,100,146,209))
+#precip = np.zeros((12,25,146,209))
+#precip_ens = np.zeros((12,25,100,146,209))
+
+for year_ind in range(year_dim):
+  selection = [el['filename'] for el in files_dict if el['end_year']==years[year_ind]]
+  print selection
+  for run_ind in range(max_runs):
+  	file_path = os.path.join(dir_path, selection[run_ind])
+  	#print file_path
+  	ds = ncfile(path)
+  	print ds.variables.keys()
+  	ds_precip = ds.variables['item5216_monthly_mean'][:]
+  	ds_precip = np.squeeze(ds_precip)
+  	print ds_precip.shape
+  	precip_ens[:,year_ind,run_ind,:,:] = ds_precip
+    #lats = dataset.variables['global_latitude0'][:]
+    #lat_dim = lats.shape[0]
+    #lon_dim = lats.shape[1]
+print precip_ens
+
+"""
        
 for moncount in np.arange(len(mon)):
             nc=ncfile(path + mon[moncount]+'_precip_Asia_1986-2010_Dec-Nov.nc')
@@ -80,6 +105,8 @@ print precip_ens.shape
 lat = nc.variables['lat'][:]
 lon = nc.variables['lon'][:]
 
+"""
+"""
 chirps = ncfile(path + 'chirps_clim_mn_mmd_jan_dec.nc')	    
 chirps2 = chirps.variables['precip'][:]
 lat2 = chirps.variables['latitude'][:]
