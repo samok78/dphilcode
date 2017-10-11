@@ -1,3 +1,5 @@
+#Sarah test for github
+
 import os
 from sys import exit
 import numpy as np
@@ -60,10 +62,10 @@ for mo in month:
     time6=d_clim2.variables['ensmember'][:]
     ax = fig.add_subplot(2,1,c)
 
-    
+
     d_obs=s(ifile_obs, mode='r')
     pr_obs=d_obs.variables['precip'][:,0,0]
-    
+
     e_all=np.sort(pr_all)#[::-1]
     e_nat=np.sort(pr_nat)#[::-1]
     e_clim=np.sort(pr_clim)#[::-1]
@@ -82,7 +84,7 @@ for mo in month:
     print fit
     print np.mean(e_all)
     print np.std(e_all)
-  
+
     fit2 = sci.norm.pdf(e_nat, np.mean(e_nat), np.std(e_nat))
     plt.plot(e_nat,fit2,'-o', label='NATURAL _AFRICA', alpha=0.3, fillstyle="none")
     #plt.hist(e_nat,normed=True, label='NATURAL', alpha=0.3)
@@ -108,7 +110,7 @@ for mo in month:
     fit7 = sci.norm.pdf(e_clim2, np.mean(e_clim2), np.std(e_clim2))
     plt.plot(e_clim2,fit7,'-o', label='HADAM3P 1987-2011 - ASIA', alpha=0.3, fillstyle="none")
     #plt.hist(e_clim2,normed=True, label='HADAM3P 1987-2011', alpha=0.3)
-    
+
     plt.xlabel('mm/day',labelpad=5,fontsize=12)
     plt.ylabel('freq',labelpad=5,fontsize=12)
     plt.title(mo, fontsize=12)
